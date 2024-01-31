@@ -5,6 +5,7 @@ import com.javabootcamp.fintechbank.exceptions.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,17 @@ public class AccountService {
     @Transactional
     public AccountResponse createAccount(CreateAccountRequest theCreateAccountRequest) {
 
+        // check account type ... should be SAVING, Checking, CURRENT
+        List<String> accountType = new ArrayList<>();
+        accountType.add("SAVING");
+        accountType.add("Checking");
+        accountType.add("CURRENT");
+
+        if (!accountType.contains(theCreateAccountRequest.getType())) {
+            throw new InternalServerException("Account type is not correct.");
+        }
+
+        // create new account
         Account tempAccount = new Account();
         tempAccount.setType(theCreateAccountRequest.getType());
         tempAccount.setName(theCreateAccountRequest.getName());
@@ -132,7 +144,7 @@ public class AccountService {
     public AccountResponse getAccountById(Integer accountNo) {
         Optional<Account> optionalAccount = accountRepository.findById(accountNo);
         if (optionalAccount.isEmpty()) {
-            throw new NotFoundException("My Account not found");
+            throw new NotFoundException("Account is not found: " + accountNo);
         }
 
         Account account = optionalAccount.get();
